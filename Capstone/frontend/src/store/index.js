@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
 
+
 axios.defaults.withCredentials = true;
 const baseUrl = 'http://localhost:9000';
 
@@ -15,9 +16,14 @@ export default createStore({
   mutations: {
     setProducts(state, payload) {
       state.Products = payload;
+      state.cart = payload.cart;
     },
     addToCart(state, product) {
       state.cart.push(product);
+    },
+    setUser(state, user) {
+      state.user = user;
+      state.loggedIn = true;
     },
     // Add other mutations if needed
   },
@@ -71,7 +77,22 @@ export default createStore({
         console.error('Error editing product:', error);
       }
     },
-  },
+    async login(context, userLogin) {
+      let { data } = await axios.post(baseUrl +'/login',userLogin);
+      $cookies.set('jwt', data.token);
+      alert(data.msg);
+      await router.push('/');
+      window.location.reload();
+    },
+    async logout(context) {
+      let cookies = $cookies.keys();
+      console.log(cookies);
+      $cookies.remove('jwt');  //deleting from frontend
+      window.location.reload();
+      let { data } = await axios.delete(baseUrl + '/logout');  //deleting from backend
+      alert(data.msg);
+    },
+  }, // Add a comma here
   modules: {
     // Add any modules if needed
   },
